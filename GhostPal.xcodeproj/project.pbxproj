@@ -1,0 +1,280 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		40010001 /* GhostState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010001 /* GhostState.swift */; };
+		40010002 /* DockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010002 /* DockManager.swift */; };
+		40010003 /* IdleTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010003 /* IdleTracker.swift */; };
+		40010004 /* GhostCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010004 /* GhostCanvasView.swift */; };
+		40010005 /* GhostWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010005 /* GhostWindow.swift */; };
+		40010006 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010006 /* AppDelegate.swift */; };
+		40010007 /* GhostPalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010007 /* GhostPalApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1D6058910D05DD3D006C74DE /* GhostPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GhostPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		30010001 /* GhostState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/GhostState.swift; sourceTree = "<group>"; };
+		30010002 /* DockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/DockManager.swift; sourceTree = "<group>"; };
+		30010003 /* IdleTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/IdleTracker.swift; sourceTree = "<group>"; };
+		30010004 /* GhostCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/GhostCanvasView.swift; sourceTree = "<group>"; };
+		30010005 /* GhostWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/GhostWindow.swift; sourceTree = "<group>"; };
+		30010006 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/AppDelegate.swift; sourceTree = "<group>"; };
+		30010007 /* GhostPalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/GhostPalApp.swift; sourceTree = "<group>"; };
+		30010008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1D60588F0D05DD3D006C74DE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		29B97314FDCFA3AC11CA2CEA = {
+			isa = PBXGroup;
+			children = (
+				29B97315FDCFA3AC11CA2CEA /* GhostPal */,
+				29B97316FDCFA3AC11CA2CEA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA3AC11CA2CEA /* GhostPal */ = {
+			isa = PBXGroup;
+			children = (
+				30010007 /* GhostPalApp.swift */,
+				30010006 /* AppDelegate.swift */,
+				30010001 /* GhostState.swift */,
+				30010002 /* DockManager.swift */,
+				30010003 /* IdleTracker.swift */,
+				30010004 /* GhostCanvasView.swift */,
+				30010005 /* GhostWindow.swift */,
+				30010008 /* Info.plist */,
+			);
+			path = GhostPal;
+			sourceTree = "<group>";
+		};
+		29B97316FDCFA3AC11CA2CEA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1D6058910D05DD3D006C74DE /* GhostPal.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D60588D0D05DD3D006C74DE /* GhostPal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D6058960D05DD3D006C74DE /* Build configuration list for PBXNativeTarget "GhostPal" */;
+			buildPhases = (
+				1D60588E0D05DD3D006C74DE /* Sources */,
+				1D60588F0D05DD3D006C74DE /* Frameworks */,
+				1D6058900D05DD3D006C74DF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GhostPal;
+			productName = GhostPal;
+			productReference = 1D6058910D05DD3D006C74DE /* GhostPal.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1D6058900D05DD3D006C74DE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					1D60588D0D05DD3D006C74DE = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 1D6058920D05DD3D006C74DE /* Build configuration list for PBXProject "GhostPal" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 29B97314FDCFA3AC11CA2CEA;
+			productRefGroup = 29B97316FDCFA3AC11CA2CEA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D60588D0D05DD3D006C74DE /* GhostPal */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1D6058900D05DD3D006C74DF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1D60588E0D05DD3D006C74DE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				40010001 /* GhostState.swift in Sources */,
+				40010002 /* DockManager.swift in Sources */,
+				40010003 /* IdleTracker.swift in Sources */,
+				40010004 /* GhostCanvasView.swift in Sources */,
+				40010005 /* GhostWindow.swift in Sources */,
+				40010006 /* AppDelegate.swift in Sources */,
+				40010007 /* GhostPalApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D6058940D05DD3D006C74DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_PROTOTYPES = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = GhostPal/Info.plist;
+				INFOPLIST_KEY_LSUIElement = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghostpal.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1D6058950D05DD3D006C74DE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_PROTOTYPES = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = GhostPal/Info.plist;
+				INFOPLIST_KEY_LSUIElement = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghostpal.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		1D6058970D05DD3D006C74DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GhostPal/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghostpal.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1D6058980D05DD3D006C74DE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GhostPal/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghostpal.mac;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCConfigurationList section */
+		1D6058920D05DD3D006C74DE /* Build configuration list for PBXProject "GhostPal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D6058940D05DD3D006C74DE /* Debug */,
+				1D6058950D05DD3D006C74DE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1D6058960D05DD3D006C74DE /* Build configuration list for PBXNativeTarget "GhostPal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D6058970D05DD3D006C74DE /* Debug */,
+				1D6058980D05DD3D006C74DE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1D6058900D05DD3D006C74DE /* Project object */;
+}

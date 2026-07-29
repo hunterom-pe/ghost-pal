@@ -1,0 +1,213 @@
+import SwiftUI
+
+/// Procedural SwiftUI Canvas View rendering the cute, spooky ghost with animated states and particles.
+struct GhostCanvasView: View {
+    let state: GhostState
+    let facingDirection: FacingDirection
+    let animationTime: Double
+    
+    var body: some View {
+        ZStack {
+            // Main Ghost Canvas
+            Canvas { context, size in
+                let w = size.width
+                let h = size.height
+                let center = CGPoint(x: w / 2, y: h / 2 + 5)
+                
+                // 1. Draw Body Glow / Shadow
+                var shadowPath = Path()
+                shadowPath.addEllipse(in: CGRect(x: center.x - 22, y: h - 14, width: 44, height: 10))
+                context.fill(shadowPath, with: .color(Color.black.opacity(state.isSleeping ? 0.25 : 0.12)))
+                
+                // 2. Ghost Body Path
+                let bodyRect = CGRect(x: center.x - 26, y: center.y - 32, width: 52, height: 56)
+                var bodyPath = Path()
+                
+                // Top dome head
+                let headRadius: CGFloat = 26
+                let headCenter = CGPoint(x: center.x, y: bodyRect.minY + headRadius)
+                bodyPath.addArc(center: headCenter, radius: headRadius, startAngle: .degrees(180), endAngle: .degrees(0), clockwise: false)
+                
+                // Right side down to skirt
+                bodyPath.addLine(to: CGPoint(x: headCenter.x + headRadius, y: bodyRect.maxY - 10))
+                
+                // Scalloped bottom skirt flutter
+                let skirtY = bodyRect.maxY - 4
+                let flutter = sin(animationTime * 4) * 2.0
+                
+                // 3 Scallop waves along bottom
+                bodyPath.addQuadCurve(
+                    to: CGPoint(x: headCenter.x + 9, y: skirtY + flutter),
+                    control: CGPoint(x: headCenter.x + 18, y: skirtY + 8 - flutter)
+                )
+                bodyPath.addQuadCurve(
+                    to: CGPoint(x: headCenter.x - 9, y: skirtY - flutter),
+                    control: CGPoint(x: headCenter.x, y: skirtY + 9 + flutter)
+                )
+                bodyPath.addQuadCurve(
+                    to: CGPoint(x: headCenter.x - headRadius, y: skirtY - 10),
+                    control: CGPoint(x: headCenter.x - 18, y: skirtY + 8 - flutter)
+                )
+                
+                // Left side back up to head dome
+                bodyPath.addLine(to: CGPoint(x: headCenter.x - headRadius, y: headCenter.y))
+                bodyPath.closeSubpath()
+                
+                // Fill ghost body with subtle soft gradient
+                let ghostGradient = Gradient(colors: [
+                    Color(red: 0.98, green: 0.99, blue: 1.0),
+                    Color(red: 0.91, green: 0.93, blue: 0.98)
+                ])
+                context.fill(
+                    bodyPath,
+                    with: .linearGradient(
+                        ghostGradient,
+                        startPoint: CGPoint(x: center.x, y: bodyRect.minY),
+                        endPoint: CGPoint(x: center.x, y: bodyRect.maxY)
+                    )
+                )
+                
+                // Soft ghost outline
+                context.stroke(bodyPath, with: .color(Color.blue.opacity(0.15)), lineWidth: 1.5)
+                
+                // 3. Left Stubby Arm
+                var leftArm = Path()
+                leftArm.move(to: CGPoint(x: center.x - 24, y: center.y - 2))
+                leftArm.addQuadCurve(
+                    to: CGPoint(x: center.x - 34, y: center.y + 4),
+                    control: CGPoint(x: center.x - 32, y: center.y - 4)
+                )
+                leftArm.addQuadCurve(
+                    to: CGPoint(x: center.x - 24, y: center.y + 10),
+                    control: CGPoint(x: center.x - 30, y: center.y + 12)
+                )
+                context.fill(leftArm, with: .color(Color(red: 0.94, green: 0.96, blue: 1.0)))
+                
+                // 4. Right Stubby Arm (Animated for Waving state)
+                var rightArm = Path()
+                if state == .waving {
+                    // Raised waving arm
+                    let waveAngle = sin(animationTime * 7.0) * 0.35 // Sway oscillation
+                    let armBase = CGPoint(x: center.x + 22, y: center.y - 4)
+                    
+                    context.withCGContext { cgContext in
+                        cgContext.translateBy(x: armBase.x, y: armBase.y)
+                        cgContext.rotate(by: waveAngle)
+                        
+                        var raisedArm = Path()
+                        raisedArm.move(to: .zero)
+                        raisedArm.addQuadCurve(
+                            to: CGPoint(x: 14, y: -16),
+                            control: CGPoint(x: 4, y: -14)
+                        )
+                        raisedArm.addQuadCurve(
+                            to: CGPoint(x: 4, y: 4),
+                            control: CGPoint(x: 16, y: -2)
+                        )
+                        raisedArm.closeSubpath()
+                        
+                        let armFill = Path(raisedArm.cgPath)
+                        context.fill(armFill, with: .color(Color(red: 0.95, green: 0.96, blue: 1.0)))
+                    }
+                } else {
+                    // Normal resting right arm
+                    rightArm.move(to: CGPoint(x: center.x + 24, y: center.y - 2))
+                    rightArm.addQuadCurve(
+                        to: CGPoint(x: center.x + 34, y: center.y + 4),
+                        control: CGPoint(x: center.x + 32, y: center.y - 4)
+                    )
+                    rightArm.addQuadCurve(
+                        to: CGPoint(x: center.x + 24, y: center.y + 10),
+                        control: CGPoint(x: center.x + 30, y: center.y + 12)
+                    )
+                    context.fill(rightArm, with: .color(Color(red: 0.94, green: 0.96, blue: 1.0)))
+                }
+                
+                // 5. Cute Blushing Cheeks
+                let cheekColor = Color(red: 1.0, green: 0.65, blue: 0.75).opacity(0.45)
+                context.fill(
+                    Path(ellipseIn: CGRect(x: center.x - 19, y: center.y - 2, width: 8, height: 5)),
+                    with: .color(cheekColor)
+                )
+                context.fill(
+                    Path(ellipseIn: CGRect(x: center.x + 11, y: center.y - 2, width: 8, height: 5)),
+                    with: .color(cheekColor)
+                )
+                
+                // 6. Eyes (Awake vs Sleeping)
+                if state.isSleeping {
+                    // Closed eyes: (u u) arcs
+                    let eyeY = center.y - 12
+                    var leftEye = Path()
+                    leftEye.addArc(
+                        center: CGPoint(x: center.x - 11, y: eyeY),
+                        radius: 4,
+                        startAngle: .degrees(0),
+                        endAngle: .degrees(180),
+                        clockwise: false
+                    )
+                    context.stroke(leftEye, with: .color(Color(white: 0.15)), lineWidth: 2.2)
+                    
+                    var rightEye = Path()
+                    rightEye.addArc(
+                        center: CGPoint(x: center.x + 11, y: eyeY),
+                        radius: 4,
+                        startAngle: .degrees(0),
+                        endAngle: .degrees(180),
+                        clockwise: false
+                    )
+                    context.stroke(rightEye, with: .color(Color(white: 0.15)), lineWidth: 2.2)
+                } else {
+                    // Open oval eyes with shiny highlight
+                    let eyeY = center.y - 14
+                    let leftEyeRect = CGRect(x: center.x - 14, y: eyeY - 6, width: 7, height: 11)
+                    let rightEyeRect = CGRect(x: center.x + 7, y: eyeY - 6, width: 7, height: 11)
+                    
+                    context.fill(Path(ellipseIn: leftEyeRect), with: .color(Color(white: 0.12)))
+                    context.fill(Path(ellipseIn: rightEyeRect), with: .color(Color(white: 0.12)))
+                    
+                    // White shine dots
+                    let leftShine = CGRect(x: leftEyeRect.minX + 1.5, y: leftEyeRect.minY + 2.0, width: 2.5, height: 3.5)
+                    let rightShine = CGRect(x: rightEyeRect.minX + 1.5, y: rightEyeRect.minY + 2.0, width: 2.5, height: 3.5)
+                    context.fill(Path(ellipseIn: leftShine), with: .color(.white))
+                    context.fill(Path(ellipseIn: rightShine), with: .color(.white))
+                }
+            }
+            .frame(width: 80, height: 85)
+            .scaleEffect(x: facingDirection == .left ? -1 : 1, y: 1)
+            
+            // Floating 'z Z Z' particles when sleeping
+            if state.isSleeping {
+                SleepingZParticlesView(animationTime: animationTime)
+                    .offset(y: -40)
+            }
+        }
+    }
+}
+
+/// Floating animated 'z Z Z' particles drifting upward and fading.
+struct SleepingZParticlesView: View {
+    let animationTime: Double
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<3, id: \.self) { index in
+                let delay = Double(index) * 1.1
+                let cycleTime = (animationTime + delay).truncatingRemainder(dividingBy: 3.3)
+                let progress = cycleTime / 3.3 // 0.0 to 1.0
+                
+                let yOffset = -progress * 38.0
+                let xOffset = sin(progress * .pi * 3.0) * 8.0 + Double(index * 6 - 6)
+                let opacity = progress < 0.2 ? (progress / 0.2) : (1.0 - (progress - 0.2) / 0.8)
+                let scale = 0.7 + (progress * 0.5) + Double(index) * 0.15
+                
+                Text(index == 0 ? "z" : (index == 1 ? "Z" : "Z"))
+                    .font(.system(size: 14 + CGFloat(index * 3), weight: .bold, design: .rounded))
+                    .foregroundColor(Color.white.opacity(opacity * 0.9))
+                    .shadow(color: Color.blue.opacity(0.5), radius: 3)
+                    .scaleEffect(scale)
+                    .offset(x: xOffset, y: yOffset)
+            }
+        }
+    }
+}
