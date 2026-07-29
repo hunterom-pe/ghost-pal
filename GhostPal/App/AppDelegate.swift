@@ -167,12 +167,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let maxX = dockInfo.maxX
         let dockTopY = dockInfo.topY
         
+        let mouseLocation = NSEvent.mouseLocation
+        let dx = mouseLocation.x - ghostPosition.x
+        let dy = mouseLocation.y - ghostPosition.y
+        let mouseDistance = sqrt(dx * dx + dy * dy)
+        
+        // Item 1: Cursor Staring Check
+        if (currentState == .patrol || currentState == .staring) && mouseDistance <= 160.0 {
+            currentState = .staring
+            facingDirection = (dx >= 0) ? .right : .left
+            let relativeDx = facingDirection == .right ? dx : -dx
+            eyeOffsetX = max(-5.5, min(5.5, relativeDx / 18.0))
+            headTiltAngle = max(-8.0, min(8.0, dy / 12.0))
+            
+            let bobbingY = sin(timeStep * 3.5) * 4.0
+            ghostPosition.y = dockTopY + 16.0 + bobbingY
+            return
+        } else if currentState == .staring && mouseDistance > 180.0 {
+            currentState = .patrol
+            eyeOffsetX = 0.0
+            headTiltAngle = 0.0
+        }
+        
         switch currentState {
         case .patrol:
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
             
-            // Patrol Glide Motion
             let directionMultiplier: CGFloat = (facingDirection == .right) ? 1.0 : -1.0
             ghostPosition.x += glideSpeed * directionMultiplier
             
@@ -187,23 +208,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let bobbingY = sin(timeStep * 3.5) * 8.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
-            // Check Random Look Around trigger (every 25 to 60 seconds)
             if timeStep >= nextLookAroundTime {
                 currentState = .lookingAround
                 lookAroundEndTime = timeStep + 3.6
-            }
-            // Check Random Wave trigger (every 60 to 120 seconds)
-            else if timeStep >= nextWaveTime {
+            } else if timeStep >= nextWaveTime {
                 currentState = .waving
                 waveEndTime = timeStep + 3.0
-            }
-            // Check System Idle (3 minutes of inactivity -> Sleep)
-            else if idleTracker.isSystemIdle {
+            } else if idleTracker.isSystemIdle {
                 currentState = .sleeping
             }
             
         case .lookingAround:
-            // Pause glide motion, continue gentle bobbing
             let bobbingY = sin(timeStep * 3.5) * 4.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
@@ -211,15 +226,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let elapsed = lookDuration - (lookAroundEndTime - timeStep)
             
             if elapsed < 1.2 {
-                // Phase 1: Look left with curious head tilt
                 eyeOffsetX = -4.5
                 headTiltAngle = -6.0
             } else if elapsed < 2.4 {
-                // Phase 2: Look right with curious head tilt
                 eyeOffsetX = 4.5
                 headTiltAngle = 6.0
             } else {
-                // Phase 3: Center eyes
                 eyeOffsetX = 0.0
                 headTiltAngle = 0.0
             }
@@ -229,7 +241,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 headTiltAngle = 0.0
                 currentState = .patrol
                 
-                // 40% chance to flip direction after looking around
                 if Double.random(in: 0...1) < 0.4 {
                     facingDirection = (facingDirection == .right) ? .left : .right
                 }
@@ -272,6 +283,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 nextWaveTime = timeStep + Double.random(in: 60.0...120.0)
                 nextLookAroundTime = timeStep + Double.random(in: 25.0...55.0)
             }
+            
+        case .staring:
+            break
         }
     }
 }
