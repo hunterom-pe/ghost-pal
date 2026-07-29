@@ -10,6 +10,7 @@ enum GhostState: String, CustomStringConvertible {
     case lookingAround = "Looking Around"
     case staring = "Staring at Cursor"
     case flipping = "Acrobatic Flip!"
+    case startled = "Startled!"
     
     var description: String {
         return self.rawValue
@@ -37,6 +38,10 @@ enum GhostState: String, CustomStringConvertible {
     
     var isFlipping: Bool {
         return self == .flipping
+    }
+    
+    var isStartled: Bool {
+        return self == .startled
     }
 }
 

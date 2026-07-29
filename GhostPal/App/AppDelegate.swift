@@ -27,6 +27,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var glideSpeed: CGFloat = 1.4
     private var timeStep: Double = 0.0
     
+    // Mouse Velocity Tracking for Startled State
+    private var lastMouseLocation: CGPoint = .zero
+    private var lastMouseTime: Double = 0.0
+    private var startledEndTime: Double = 0.0
+    
     // Random Timers
     private var nextWaveTime: Double = 60.0
     private var waveEndTime: Double = 0.0
@@ -133,6 +138,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         nextLookAroundTime = 25.0 + Double.random(in: 0...35.0)
         nextFlipTime = 40.0 + Double.random(in: 0...40.0)
         nextEmojiTime = 15.0 + Double.random(in: 0...20.0)
+        lastMouseLocation = NSEvent.mouseLocation
+        lastMouseTime = 0.0
     }
     
     // MARK: - 4. Click-to-Wake Global Event Monitor
@@ -173,7 +180,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         timeStep += 1.0 / 60.0
         animationTime = timeStep
         
-        // Item 4: Check macOS Dark Mode / Nighttime
         let isDarkMode = NSApp.effectiveAppearance.name == .darkAqua || NSApp.effectiveAppearance.name == .accessibilityHighContrastDarkAqua
         let hour = Calendar.current.component(.hour, from: Date())
         isNightMode = isDarkMode || hour >= 20 || hour < 6
@@ -188,8 +194,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let dy = mouseLocation.y - ghostPosition.y
         let mouseDistance = sqrt(dx * dx + dy * dy)
         
+        // Item 5: Mouse Velocity Tracking for Startled State Trigger
+        let mDist = sqrt(pow(mouseLocation.x - lastMouseLocation.x, 2) + pow(mouseLocation.y - lastMouseLocation.y, 2))
+        let dt = timeStep - lastMouseTime
+        let mouseVelocity = dt > 0 ? (mDist / CGFloat(dt)) : 0.0
+        
+        lastMouseLocation = mouseLocation
+        lastMouseTime = timeStep
+        
+        if (currentState == .patrol || currentState == .staring || currentState == .lookingAround) && mouseDistance <= 110.0 && mouseVelocity >= 1400.0 {
+            currentState = .startled
+            startledEndTime = timeStep + 1.6
+        }
+        
         // Item 3: Thought Bubble Emoji Check
-        if timeStep >= nextEmojiTime && currentEmoji == nil && currentState != .sleeping {
+        if timeStep >= nextEmojiTime && currentEmoji == nil && currentState != .sleeping && currentState != .startled {
             currentEmoji = emojiPool.randomElement()
             emojiEndTime = timeStep + 3.5
             nextEmojiTime = timeStep + Double.random(in: 25.0...45.0)
@@ -245,6 +264,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 waveEndTime = timeStep + 3.0
             } else if idleTracker.isSystemIdle {
                 currentState = .sleeping
+            }
+            
+        case .startled:
+            // Item 5: Startled gasp float reaction
+            eyeOffsetX = 0.0
+            headTiltAngle = 0.0
+            flipAngle = 0.0
+            
+            let remaining = startledEndTime - timeStep
+            let progress = 1.0 - (remaining / 1.6)
+            let startledHeight = sin(progress * .pi) * 28.0
+            ghostPosition.y = dockTopY + 16.0 + startledHeight
+            
+            if timeStep >= startledEndTime {
+                currentState = .patrol
             }
             
         case .flipping:

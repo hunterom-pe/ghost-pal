@@ -186,7 +186,7 @@ struct GhostCanvasView: View {
                         with: .color(cheekColor)
                     )
                     
-                    // 6. Eyes
+                    // 6. Eyes & Mouth Expression
                     if state.isSleeping {
                         let eyeY = center.y - 12
                         var leftEye = Path()
@@ -208,6 +208,23 @@ struct GhostCanvasView: View {
                             clockwise: false
                         )
                         context.stroke(rightEye, with: .color(Color(white: 0.15)), lineWidth: 2.2)
+                    } else if state.isStartled {
+                        // Item 5: Wide surprised eyes (O o O) and open gasp mouth
+                        let eyeY = center.y - 14
+                        let leftEyeRect = CGRect(x: center.x - 15, y: eyeY - 8, width: 10, height: 14)
+                        let rightEyeRect = CGRect(x: center.x + 5, y: eyeY - 8, width: 10, height: 14)
+                        
+                        context.fill(Path(ellipseIn: leftEyeRect), with: .color(Color(white: 0.12)))
+                        context.fill(Path(ellipseIn: rightEyeRect), with: .color(Color(white: 0.12)))
+                        
+                        let leftShine = CGRect(x: leftEyeRect.minX + 2, y: leftEyeRect.minY + 2.5, width: 3.5, height: 4.5)
+                        let rightShine = CGRect(x: rightEyeRect.minX + 2, y: rightEyeRect.minY + 2.5, width: 3.5, height: 4.5)
+                        context.fill(Path(ellipseIn: leftShine), with: .color(.white))
+                        context.fill(Path(ellipseIn: rightShine), with: .color(.white))
+                        
+                        // Wide open gasp mouth
+                        let gaspMouth = CGRect(x: center.x - 4, y: center.y + 4, width: 8, height: 10)
+                        context.fill(Path(ellipseIn: gaspMouth), with: .color(Color(white: 0.15)))
                     } else {
                         let eyeY = center.y - 14
                         let currentEyeX = eyeOffsetX
