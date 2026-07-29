@@ -44,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private var nextEmojiTime: Double = 20.0
     private var emojiEndTime: Double = 0.0
-    private let emojiPool = ["☕️", "🎃", "👻", "🍕", "⭐️", "🎮", "🎵", "💬", "🌙", "🍭", "🐟", "🐾"]
+    private let emojiPool = ["☕️", "🎃", "👻", "🍕", "⭐️", "🎮", "🎵", "💬", "🌙", "🍭", "🐟", "🐾", "🥧"]
     
     // Wake-up Jump Physics
     private var jumpVelocityY: CGFloat = 0.0
@@ -418,6 +418,18 @@ struct GhostHostView: View {
                 
                 if companion == .salem {
                     SalemCanvasView(
+                        state: state,
+                        facingDirection: facing,
+                        animationTime: animTime,
+                        eyeOffsetX: eyeOffsetX,
+                        headTiltAngle: headTiltAngle,
+                        flipAngle: flipAngle,
+                        currentEmoji: currentEmoji,
+                        isNightMode: isNightMode
+                    )
+                    .position(x: position.x, y: geometry.size.height - position.y)
+                } else if companion == .jack {
+                    JackCanvasView(
                         state: state,
                         facingDirection: facing,
                         animationTime: animTime,

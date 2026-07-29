@@ -4,6 +4,7 @@ import Foundation
 enum CompanionType: String, CaseIterable, Identifiable {
     case boo = "Boo (Ghost)"
     case salem = "Salem (Black Cat)"
+    case jack = "Jack (Pumpkin)"
     
     var id: String { rawValue }
     
@@ -11,6 +12,7 @@ enum CompanionType: String, CaseIterable, Identifiable {
         switch self {
         case .boo: return "Boo"
         case .salem: return "Salem"
+        case .jack: return "Jack"
         }
     }
     
@@ -18,6 +20,7 @@ enum CompanionType: String, CaseIterable, Identifiable {
         switch self {
         case .boo: return "👻"
         case .salem: return "🐈‍⬛"
+        case .jack: return "🎃"
         }
     }
 }
