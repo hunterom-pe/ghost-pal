@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Procedural SwiftUI Canvas View rendering the cute, spooky ghost with animated states and particles.
+/// Procedural SwiftUI Canvas View rendering the cute, spooky ghost with animated states, thought bubbles, and FX.
 struct GhostCanvasView: View {
     let state: GhostState
     let facingDirection: FacingDirection
@@ -8,6 +8,7 @@ struct GhostCanvasView: View {
     let eyeOffsetX: CGFloat
     let headTiltAngle: Double
     let flipAngle: Double
+    let currentEmoji: String?
     
     init(
         state: GhostState,
@@ -15,7 +16,8 @@ struct GhostCanvasView: View {
         animationTime: Double,
         eyeOffsetX: CGFloat = 0.0,
         headTiltAngle: Double = 0.0,
-        flipAngle: Double = 0.0
+        flipAngle: Double = 0.0,
+        currentEmoji: String? = nil
     ) {
         self.state = state
         self.facingDirection = facingDirection
@@ -23,6 +25,7 @@ struct GhostCanvasView: View {
         self.eyeOffsetX = eyeOffsetX
         self.headTiltAngle = headTiltAngle
         self.flipAngle = flipAngle
+        self.currentEmoji = currentEmoji
     }
     
     var body: some View {
@@ -38,7 +41,6 @@ struct GhostCanvasView: View {
                 shadowPath.addEllipse(in: CGRect(x: center.x - 22, y: h - 14, width: 44, height: 10))
                 context.fill(shadowPath, with: .color(Color.black.opacity(state.isSleeping ? 0.25 : 0.12)))
                 
-                // Apply rotation (flip angle for cartwheel flip or head tilt for looking around)
                 context.withCGContext { cgContext in
                     let totalRotation = (flipAngle + headTiltAngle) * .pi / 180.0
                     if totalRotation != 0.0 {
@@ -197,17 +199,57 @@ struct GhostCanvasView: View {
             .frame(width: 80, height: 85)
             .scaleEffect(x: facingDirection == .left ? -1 : 1, y: 1)
             
+            // Item 3: Thought Bubble View
+            if let emoji = currentEmoji {
+                ThoughtBubbleView(emoji: emoji)
+                    .offset(y: -52)
+            }
+            
             // Floating 'z Z Z' particles when sleeping
             if state.isSleeping {
                 SleepingZParticlesView(animationTime: animationTime)
                     .offset(y: -40)
             }
             
-            // Sparkles burst when flipping!
+            // Sparkles burst when flipping
             if state.isFlipping {
                 SparklesView(animationTime: animationTime)
             }
         }
+    }
+}
+
+/// Item 3: Floating Thought Bubble View with Emoji
+struct ThoughtBubbleView: View {
+    let emoji: String
+    
+    var body: some View {
+        VStack(spacing: 2) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.18), radius: 4, x: 0, y: 2)
+                    .frame(width: 38, height: 32)
+                
+                Text(emoji)
+                    .font(.system(size: 18))
+            }
+            
+            // Thought bubble little circles
+            HStack(spacing: 3) {
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 6, height: 6)
+                    .shadow(color: Color.black.opacity(0.1), radius: 1)
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 4, height: 4)
+                    .shadow(color: Color.black.opacity(0.1), radius: 1)
+            }
+            .offset(y: -2)
+        }
+        .transition(.scale.combined(with: .opacity))
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: emoji)
     }
 }
 

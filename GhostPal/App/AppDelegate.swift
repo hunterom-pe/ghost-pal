@@ -20,6 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @Published private(set) var eyeOffsetX: CGFloat = 0.0
     @Published private(set) var headTiltAngle: Double = 0.0
     @Published private(set) var flipAngle: Double = 0.0
+    @Published private(set) var currentEmoji: String? = nil
     
     private var timer: Timer?
     private var glideSpeed: CGFloat = 1.4
@@ -33,6 +34,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var lookAroundEndTime: Double = 0.0
     
     private var nextFlipTime: Double = 40.0
+    
+    private var nextEmojiTime: Double = 20.0
+    private var emojiEndTime: Double = 0.0
+    private let emojiPool = ["☕️", "🎃", "👻", "🍕", "⭐️", "🎮", "🎵", "💬", "🌙", "🍭"]
     
     // Wake-up Jump Physics
     private var jumpVelocityY: CGFloat = 0.0
@@ -126,6 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         nextWaveTime = 60.0 + Double.random(in: 0...60.0)
         nextLookAroundTime = 25.0 + Double.random(in: 0...35.0)
         nextFlipTime = 40.0 + Double.random(in: 0...40.0)
+        nextEmojiTime = 15.0 + Double.random(in: 0...20.0)
     }
     
     // MARK: - 4. Click-to-Wake Global Event Monitor
@@ -175,6 +181,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let dx = mouseLocation.x - ghostPosition.x
         let dy = mouseLocation.y - ghostPosition.y
         let mouseDistance = sqrt(dx * dx + dy * dy)
+        
+        // Item 3: Thought Bubble Emoji Trigger & Expire Check
+        if timeStep >= nextEmojiTime && currentEmoji == nil && currentState != .sleeping {
+            currentEmoji = emojiPool.randomElement()
+            emojiEndTime = timeStep + 3.5
+            nextEmojiTime = timeStep + Double.random(in: 25.0...45.0)
+        } else if currentEmoji != nil && timeStep >= emojiEndTime {
+            currentEmoji = nil
+        }
         
         // Item 1: Cursor Staring Check
         if (currentState == .patrol || currentState == .staring) && mouseDistance <= 160.0 {
@@ -227,7 +242,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             
         case .flipping:
-            // Item 2: Cartwheel Flip airborne rotation & arc jump
             flipAngle += 360.0 / (0.85 * 60.0)
             let jumpProgress = flipAngle / 360.0
             let flipHeight = sin(jumpProgress * .pi) * 32.0
@@ -287,6 +301,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
             flipAngle = 0.0
+            currentEmoji = nil
             
             let restingY = dockTopY + 4.0
             ghostPosition.y = ghostPosition.y + (restingY - ghostPosition.y) * 0.08
@@ -308,6 +323,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 nextWaveTime = timeStep + Double.random(in: 60.0...120.0)
                 nextLookAroundTime = timeStep + Double.random(in: 25.0...55.0)
                 nextFlipTime = timeStep + Double.random(in: 40.0...80.0)
+                nextEmojiTime = timeStep + Double.random(in: 15.0...35.0)
             }
             
         case .staring:
@@ -328,6 +344,7 @@ struct GhostHostView: View {
     @State private var eyeOffsetX: CGFloat = 0.0
     @State private var headTiltAngle: Double = 0.0
     @State private var flipAngle: Double = 0.0
+    @State private var currentEmoji: String? = nil
     
     var body: some View {
         GeometryReader { geometry in
@@ -340,7 +357,8 @@ struct GhostHostView: View {
                     animationTime: animTime,
                     eyeOffsetX: eyeOffsetX,
                     headTiltAngle: headTiltAngle,
-                    flipAngle: flipAngle
+                    flipAngle: flipAngle,
+                    currentEmoji: currentEmoji
                 )
                 .position(x: position.x, y: geometry.size.height - position.y)
             }
@@ -352,6 +370,7 @@ struct GhostHostView: View {
         .onReceive(delegate.$eyeOffsetX) { eyeOffsetX = $0 }
         .onReceive(delegate.$headTiltAngle) { headTiltAngle = $0 }
         .onReceive(delegate.$flipAngle) { flipAngle = $0 }
+        .onReceive(delegate.$currentEmoji) { currentEmoji = $0 }
         .edgesIgnoringSafeArea(.all)
     }
 }
