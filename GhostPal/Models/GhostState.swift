@@ -7,6 +7,7 @@ enum GhostState: String, CustomStringConvertible {
     case waving = "Waving"
     case sleeping = "Sleeping"
     case wakingUp = "Waking Up!"
+    case lookingAround = "Looking Around"
     
     var description: String {
         return self.rawValue
@@ -22,6 +23,10 @@ enum GhostState: String, CustomStringConvertible {
     
     var isPatrolling: Bool {
         return self == .patrol
+    }
+    
+    var isLookingAround: Bool {
+        return self == .lookingAround
     }
 }
 
