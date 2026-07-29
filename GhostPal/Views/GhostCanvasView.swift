@@ -9,6 +9,7 @@ struct GhostCanvasView: View {
     let headTiltAngle: Double
     let flipAngle: Double
     let currentEmoji: String?
+    let isNightMode: Bool
     
     init(
         state: GhostState,
@@ -17,7 +18,8 @@ struct GhostCanvasView: View {
         eyeOffsetX: CGFloat = 0.0,
         headTiltAngle: Double = 0.0,
         flipAngle: Double = 0.0,
-        currentEmoji: String? = nil
+        currentEmoji: String? = nil,
+        isNightMode: Bool = false
     ) {
         self.state = state
         self.facingDirection = facingDirection
@@ -26,10 +28,32 @@ struct GhostCanvasView: View {
         self.headTiltAngle = headTiltAngle
         self.flipAngle = flipAngle
         self.currentEmoji = currentEmoji
+        self.isNightMode = isNightMode
     }
     
     var body: some View {
         ZStack {
+            // Item 4: Nighttime / Dark Mode Spectral Aura Glow
+            if isNightMode {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color(red: 0.6, green: 0.35, blue: 1.0).opacity(0.45),
+                                Color(red: 0.2, green: 0.8, blue: 1.0).opacity(0.2),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 5,
+                            endRadius: 55
+                        )
+                    )
+                    .frame(width: 100, height: 100)
+                    .blur(radius: 10)
+                
+                WillOWispParticlesView(animationTime: animationTime)
+            }
+            
             // Main Ghost Canvas
             Canvas { context, size in
                 let w = size.width
@@ -78,10 +102,14 @@ struct GhostCanvasView: View {
                     bodyPath.addLine(to: CGPoint(x: headCenter.x - headRadius, y: headCenter.y))
                     bodyPath.closeSubpath()
                     
-                    let ghostGradient = Gradient(colors: [
+                    let ghostGradient = Gradient(colors: isNightMode ? [
+                        Color(red: 0.96, green: 0.98, blue: 1.0),
+                        Color(red: 0.82, green: 0.88, blue: 1.0)
+                    ] : [
                         Color(red: 0.98, green: 0.99, blue: 1.0),
                         Color(red: 0.91, green: 0.93, blue: 0.98)
                     ])
+                    
                     context.fill(
                         bodyPath,
                         with: .linearGradient(
@@ -91,7 +119,8 @@ struct GhostCanvasView: View {
                         )
                     )
                     
-                    context.stroke(bodyPath, with: .color(Color.blue.opacity(0.15)), lineWidth: 1.5)
+                    let outlineColor = isNightMode ? Color(red: 0.4, green: 0.7, blue: 1.0).opacity(0.4) : Color.blue.opacity(0.15)
+                    context.stroke(bodyPath, with: .color(outlineColor), lineWidth: 1.5)
                     
                     // 3. Left Stubby Arm
                     var leftArm = Path()
@@ -199,21 +228,43 @@ struct GhostCanvasView: View {
             .frame(width: 80, height: 85)
             .scaleEffect(x: facingDirection == .left ? -1 : 1, y: 1)
             
-            // Item 3: Thought Bubble View
             if let emoji = currentEmoji {
                 ThoughtBubbleView(emoji: emoji)
                     .offset(y: -52)
             }
             
-            // Floating 'z Z Z' particles when sleeping
             if state.isSleeping {
                 SleepingZParticlesView(animationTime: animationTime)
                     .offset(y: -40)
             }
             
-            // Sparkles burst when flipping
             if state.isFlipping {
                 SparklesView(animationTime: animationTime)
+            }
+        }
+    }
+}
+
+/// Item 4: Floating Will-o'-the-wisp flame particles in night mode
+struct WillOWispParticlesView: View {
+    let animationTime: Double
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<4, id: \.self) { index in
+                let delay = Double(index) * 0.9
+                let progress = (animationTime + delay).truncatingRemainder(dividingBy: 3.0) / 3.0
+                let yOffset = -progress * 42.0
+                let xOffset = sin(progress * .pi * 2.0 + Double(index)) * 22.0
+                let opacity = (1.0 - progress) * 0.7
+                
+                Circle()
+                    .fill(Color(red: 0.4, green: 0.85, blue: 1.0))
+                    .frame(width: 6, height: 6)
+                    .blur(radius: 2)
+                    .shadow(color: Color.blue, radius: 4)
+                    .offset(x: xOffset, y: yOffset)
+                    .opacity(opacity)
             }
         }
     }
@@ -235,7 +286,6 @@ struct ThoughtBubbleView: View {
                     .font(.system(size: 18))
             }
             
-            // Thought bubble little circles
             HStack(spacing: 3) {
                 Circle()
                     .fill(Color.white)

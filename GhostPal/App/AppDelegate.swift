@@ -21,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @Published private(set) var headTiltAngle: Double = 0.0
     @Published private(set) var flipAngle: Double = 0.0
     @Published private(set) var currentEmoji: String? = nil
+    @Published private(set) var isNightMode: Bool = false
     
     private var timer: Timer?
     private var glideSpeed: CGFloat = 1.4
@@ -172,6 +173,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         timeStep += 1.0 / 60.0
         animationTime = timeStep
         
+        // Item 4: Check macOS Dark Mode / Nighttime
+        let isDarkMode = NSApp.effectiveAppearance.name == .darkAqua || NSApp.effectiveAppearance.name == .accessibilityHighContrastDarkAqua
+        let hour = Calendar.current.component(.hour, from: Date())
+        isNightMode = isDarkMode || hour >= 20 || hour < 6
+        
         let dockInfo = dockManager.dockInfo
         let minX = dockInfo.minX
         let maxX = dockInfo.maxX
@@ -182,7 +188,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let dy = mouseLocation.y - ghostPosition.y
         let mouseDistance = sqrt(dx * dx + dy * dy)
         
-        // Item 3: Thought Bubble Emoji Trigger & Expire Check
+        // Item 3: Thought Bubble Emoji Check
         if timeStep >= nextEmojiTime && currentEmoji == nil && currentState != .sleeping {
             currentEmoji = emojiPool.randomElement()
             emojiEndTime = timeStep + 3.5
@@ -345,6 +351,7 @@ struct GhostHostView: View {
     @State private var headTiltAngle: Double = 0.0
     @State private var flipAngle: Double = 0.0
     @State private var currentEmoji: String? = nil
+    @State private var isNightMode: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -358,7 +365,8 @@ struct GhostHostView: View {
                     eyeOffsetX: eyeOffsetX,
                     headTiltAngle: headTiltAngle,
                     flipAngle: flipAngle,
-                    currentEmoji: currentEmoji
+                    currentEmoji: currentEmoji,
+                    isNightMode: isNightMode
                 )
                 .position(x: position.x, y: geometry.size.height - position.y)
             }
@@ -371,6 +379,7 @@ struct GhostHostView: View {
         .onReceive(delegate.$headTiltAngle) { headTiltAngle = $0 }
         .onReceive(delegate.$flipAngle) { flipAngle = $0 }
         .onReceive(delegate.$currentEmoji) { currentEmoji = $0 }
+        .onReceive(delegate.$isNightMode) { isNightMode = $0 }
         .edgesIgnoringSafeArea(.all)
     }
 }
