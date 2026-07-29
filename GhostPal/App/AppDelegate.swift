@@ -19,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @Published private(set) var animationTime: Double = 0.0
     @Published private(set) var eyeOffsetX: CGFloat = 0.0
     @Published private(set) var headTiltAngle: Double = 0.0
+    @Published private(set) var flipAngle: Double = 0.0
     
     private var timer: Timer?
     private var glideSpeed: CGFloat = 1.4
@@ -30,6 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private var nextLookAroundTime: Double = 30.0
     private var lookAroundEndTime: Double = 0.0
+    
+    private var nextFlipTime: Double = 40.0
     
     // Wake-up Jump Physics
     private var jumpVelocityY: CGFloat = 0.0
@@ -122,6 +125,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ghostPosition = CGPoint(x: (dockInfo.minX + dockInfo.maxX) / 2.0, y: dockInfo.topY + 15)
         nextWaveTime = 60.0 + Double.random(in: 0...60.0)
         nextLookAroundTime = 25.0 + Double.random(in: 0...35.0)
+        nextFlipTime = 40.0 + Double.random(in: 0...40.0)
     }
     
     // MARK: - 4. Click-to-Wake Global Event Monitor
@@ -193,6 +197,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .patrol:
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
+            flipAngle = 0.0
             
             let directionMultiplier: CGFloat = (facingDirection == .right) ? 1.0 : -1.0
             ghostPosition.x += glideSpeed * directionMultiplier
@@ -208,7 +213,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let bobbingY = sin(timeStep * 3.5) * 8.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
-            if timeStep >= nextLookAroundTime {
+            if timeStep >= nextFlipTime {
+                currentState = .flipping
+                flipAngle = 0.0
+            } else if timeStep >= nextLookAroundTime {
                 currentState = .lookingAround
                 lookAroundEndTime = timeStep + 3.6
             } else if timeStep >= nextWaveTime {
@@ -218,7 +226,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 currentState = .sleeping
             }
             
+        case .flipping:
+            // Item 2: Cartwheel Flip airborne rotation & arc jump
+            flipAngle += 360.0 / (0.85 * 60.0)
+            let jumpProgress = flipAngle / 360.0
+            let flipHeight = sin(jumpProgress * .pi) * 32.0
+            ghostPosition.y = dockTopY + 16.0 + flipHeight
+            
+            if flipAngle >= 360.0 {
+                flipAngle = 0.0
+                currentState = .patrol
+                nextFlipTime = timeStep + Double.random(in: 45.0...85.0)
+            }
+            
         case .lookingAround:
+            flipAngle = 0.0
             let bobbingY = sin(timeStep * 3.5) * 4.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
@@ -251,6 +273,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .waving:
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
+            flipAngle = 0.0
             
             let bobbingY = sin(timeStep * 3.5) * 4.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
@@ -263,6 +286,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .sleeping:
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
+            flipAngle = 0.0
             
             let restingY = dockTopY + 4.0
             ghostPosition.y = ghostPosition.y + (restingY - ghostPosition.y) * 0.08
@@ -270,6 +294,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .wakingUp:
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
+            flipAngle = 0.0
             
             jumpOffsetY += jumpVelocityY
             jumpVelocityY -= 0.75
@@ -282,9 +307,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 currentState = .patrol
                 nextWaveTime = timeStep + Double.random(in: 60.0...120.0)
                 nextLookAroundTime = timeStep + Double.random(in: 25.0...55.0)
+                nextFlipTime = timeStep + Double.random(in: 40.0...80.0)
             }
             
         case .staring:
+            flipAngle = 0.0
             break
         }
     }
@@ -300,6 +327,7 @@ struct GhostHostView: View {
     @State private var animTime: Double = 0.0
     @State private var eyeOffsetX: CGFloat = 0.0
     @State private var headTiltAngle: Double = 0.0
+    @State private var flipAngle: Double = 0.0
     
     var body: some View {
         GeometryReader { geometry in
@@ -311,7 +339,8 @@ struct GhostHostView: View {
                     facingDirection: facing,
                     animationTime: animTime,
                     eyeOffsetX: eyeOffsetX,
-                    headTiltAngle: headTiltAngle
+                    headTiltAngle: headTiltAngle,
+                    flipAngle: flipAngle
                 )
                 .position(x: position.x, y: geometry.size.height - position.y)
             }
@@ -322,6 +351,7 @@ struct GhostHostView: View {
         .onReceive(delegate.$animationTime) { animTime = $0 }
         .onReceive(delegate.$eyeOffsetX) { eyeOffsetX = $0 }
         .onReceive(delegate.$headTiltAngle) { headTiltAngle = $0 }
+        .onReceive(delegate.$flipAngle) { flipAngle = $0 }
         .edgesIgnoringSafeArea(.all)
     }
 }

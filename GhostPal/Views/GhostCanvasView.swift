@@ -7,19 +7,22 @@ struct GhostCanvasView: View {
     let animationTime: Double
     let eyeOffsetX: CGFloat
     let headTiltAngle: Double
+    let flipAngle: Double
     
     init(
         state: GhostState,
         facingDirection: FacingDirection,
         animationTime: Double,
         eyeOffsetX: CGFloat = 0.0,
-        headTiltAngle: Double = 0.0
+        headTiltAngle: Double = 0.0,
+        flipAngle: Double = 0.0
     ) {
         self.state = state
         self.facingDirection = facingDirection
         self.animationTime = animationTime
         self.eyeOffsetX = eyeOffsetX
         self.headTiltAngle = headTiltAngle
+        self.flipAngle = flipAngle
     }
     
     var body: some View {
@@ -35,11 +38,12 @@ struct GhostCanvasView: View {
                 shadowPath.addEllipse(in: CGRect(x: center.x - 22, y: h - 14, width: 44, height: 10))
                 context.fill(shadowPath, with: .color(Color.black.opacity(state.isSleeping ? 0.25 : 0.12)))
                 
-                // Apply curious head tilt rotation if looking around
+                // Apply rotation (flip angle for cartwheel flip or head tilt for looking around)
                 context.withCGContext { cgContext in
-                    if headTiltAngle != 0.0 {
+                    let totalRotation = (flipAngle + headTiltAngle) * .pi / 180.0
+                    if totalRotation != 0.0 {
                         cgContext.translateBy(x: center.x, y: center.y)
-                        cgContext.rotate(by: headTiltAngle * .pi / 180.0)
+                        cgContext.rotate(by: totalRotation)
                         cgContext.translateBy(x: -center.x, y: -center.y)
                     }
                     
@@ -47,15 +51,12 @@ struct GhostCanvasView: View {
                     let bodyRect = CGRect(x: center.x - 26, y: center.y - 32, width: 52, height: 56)
                     var bodyPath = Path()
                     
-                    // Top dome head
                     let headRadius: CGFloat = 26
                     let headCenter = CGPoint(x: center.x, y: bodyRect.minY + headRadius)
                     bodyPath.addArc(center: headCenter, radius: headRadius, startAngle: .degrees(180), endAngle: .degrees(0), clockwise: false)
                     
-                    // Right side down to skirt
                     bodyPath.addLine(to: CGPoint(x: headCenter.x + headRadius, y: bodyRect.maxY - 10))
                     
-                    // Scalloped bottom skirt flutter
                     let skirtY = bodyRect.maxY - 4
                     let flutter = sin(animationTime * 4) * 2.0
                     
@@ -75,7 +76,6 @@ struct GhostCanvasView: View {
                     bodyPath.addLine(to: CGPoint(x: headCenter.x - headRadius, y: headCenter.y))
                     bodyPath.closeSubpath()
                     
-                    // Fill ghost body with subtle soft gradient
                     let ghostGradient = Gradient(colors: [
                         Color(red: 0.98, green: 0.99, blue: 1.0),
                         Color(red: 0.91, green: 0.93, blue: 0.98)
@@ -89,7 +89,6 @@ struct GhostCanvasView: View {
                         )
                     )
                     
-                    // Soft ghost outline
                     context.stroke(bodyPath, with: .color(Color.blue.opacity(0.15)), lineWidth: 1.5)
                     
                     // 3. Left Stubby Arm
@@ -105,7 +104,7 @@ struct GhostCanvasView: View {
                     )
                     context.fill(leftArm, with: .color(Color(red: 0.94, green: 0.96, blue: 1.0)))
                     
-                    // 4. Right Stubby Arm (Animated for Waving state)
+                    // 4. Right Stubby Arm
                     if state == .waving {
                         let waveAngle = sin(animationTime * 7.0) * 0.35
                         let armBase = CGPoint(x: center.x + 22, y: center.y - 4)
@@ -188,7 +187,6 @@ struct GhostCanvasView: View {
                         context.fill(Path(ellipseIn: leftEyeRect), with: .color(Color(white: 0.12)))
                         context.fill(Path(ellipseIn: rightEyeRect), with: .color(Color(white: 0.12)))
                         
-                        // White shine dots inside eyes
                         let leftShine = CGRect(x: leftEyeRect.minX + 1.5, y: leftEyeRect.minY + 2.0, width: 2.5, height: 3.5)
                         let rightShine = CGRect(x: rightEyeRect.minX + 1.5, y: rightEyeRect.minY + 2.0, width: 2.5, height: 3.5)
                         context.fill(Path(ellipseIn: leftShine), with: .color(.white))
@@ -203,6 +201,11 @@ struct GhostCanvasView: View {
             if state.isSleeping {
                 SleepingZParticlesView(animationTime: animationTime)
                     .offset(y: -40)
+            }
+            
+            // Sparkles burst when flipping!
+            if state.isFlipping {
+                SparklesView(animationTime: animationTime)
             }
         }
     }
@@ -230,6 +233,27 @@ struct SleepingZParticlesView: View {
                     .shadow(color: Color.blue.opacity(0.5), radius: 3)
                     .scaleEffect(scale)
                     .offset(x: xOffset, y: yOffset)
+            }
+        }
+    }
+}
+
+/// Burst of floating sparkles when doing acrobatics!
+struct SparklesView: View {
+    let animationTime: Double
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<6, id: \.self) { index in
+                let angle = Double(index) * (.pi / 3.0) + animationTime * 4.0
+                let radius: CGFloat = 34.0
+                let x = cos(angle) * radius
+                let y = sin(angle) * radius
+                
+                Text("✨")
+                    .font(.system(size: 14))
+                    .offset(x: x, y: y)
+                    .opacity(0.85)
             }
         }
     }
