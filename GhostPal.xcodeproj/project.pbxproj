@@ -15,6 +15,8 @@
 		40010006 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010006 /* AppDelegate.swift */; };
 		40010007 /* GhostPalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010007 /* GhostPalApp.swift */; };
 		40010008 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 30010009 /* AppIcon.icns */; };
+		40010009 /* CompanionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010010 /* CompanionType.swift */; };
+		40010010 /* SalemCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30010011 /* SalemCanvasView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		30010007 /* GhostPalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/GhostPalApp.swift; sourceTree = "<group>"; };
 		30010008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		30010009 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		30010010 /* CompanionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/CompanionType.swift; sourceTree = "<group>"; };
+		30010011 /* SalemCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/SalemCanvasView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,9 +59,11 @@
 				30010007 /* GhostPalApp.swift */,
 				30010006 /* AppDelegate.swift */,
 				30010001 /* GhostState.swift */,
+				30010010 /* CompanionType.swift */,
 				30010002 /* DockManager.swift */,
 				30010003 /* IdleTracker.swift */,
 				30010004 /* GhostCanvasView.swift */,
+				30010011 /* SalemCanvasView.swift */,
 				30010005 /* GhostWindow.swift */,
 				30010008 /* Info.plist */,
 				30010009 /* AppIcon.icns */,
@@ -148,6 +154,8 @@
 				40010005 /* GhostWindow.swift in Sources */,
 				40010006 /* AppDelegate.swift in Sources */,
 				40010007 /* GhostPalApp.swift in Sources */,
+				40010009 /* CompanionType.swift in Sources */,
+				40010010 /* SalemCanvasView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import Combine
 
-/// Main App Delegate coordinating menu bar status item, overlay window, state machine, timers, and click-to-wake for Boo.
+/// Main App Delegate coordinating menu bar status item, overlay window, state machine, timers, and companion switching.
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var window: GhostWindow!
@@ -12,7 +12,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let dockManager = DockManager.shared
     private let idleTracker = IdleTracker()
     
-    // Animation & State Variables
+    // Companion Selection & Animation State
+    @Published private(set) var currentCompanion: CompanionType = .boo
     @Published private(set) var currentState: GhostState = .patrol
     @Published private(set) var facingDirection: FacingDirection = .right
     @Published private(set) var ghostPosition: CGPoint = .zero
@@ -24,7 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @Published private(set) var isNightMode: Bool = false
     
     private var timer: Timer?
-    private var glideSpeed: CGFloat = 0.8 // Calmer, gentler floating speed for Boo
+    private var glideSpeed: CGFloat = 0.8
     private var timeStep: Double = 0.0
     
     // Mouse Velocity Tracking for Startled State
@@ -43,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private var nextEmojiTime: Double = 20.0
     private var emojiEndTime: Double = 0.0
-    private let emojiPool = ["☕️", "🎃", "👻", "🍕", "⭐️", "🎮", "🎵", "💬", "🌙", "🍭"]
+    private let emojiPool = ["☕️", "🎃", "👻", "🍕", "⭐️", "🎮", "🎵", "💬", "🌙", "🍭", "🐟", "🐾"]
     
     // Wake-up Jump Physics
     private var jumpVelocityY: CGFloat = 0.0
@@ -64,26 +65,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         timer?.invalidate()
     }
     
-    // MARK: - 1. Menu Bar NSStatusItem Setup
+    // MARK: - 1. Menu Bar NSStatusItem & Companion Switcher Setup
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        
+        updateStatusMenu()
+    }
+    
+    private func updateStatusMenu() {
         if let button = statusItem.button {
             button.image = createGhostMenuIcon()
-            button.toolTip = "Boo 👻 - Dock Companion"
+            button.toolTip = "\(currentCompanion.name) \(currentCompanion.emoji) - Dock Companion"
         }
         
         let menu = NSMenu()
-        let titleItem = NSMenuItem(title: "Boo 👻 (Dock Companion)", action: nil, keyEquivalent: "")
+        let titleItem = NSMenuItem(title: "\(currentCompanion.name) \(currentCompanion.emoji) (Dock Companion)", action: nil, keyEquivalent: "")
         titleItem.isEnabled = false
         menu.addItem(titleItem)
         menu.addItem(NSMenuItem.separator())
         
-        let quitItem = NSMenuItem(title: "Quit Boo", action: #selector(quitApp), keyEquivalent: "q")
+        // Character Switcher Submenu
+        let companionSubmenu = NSMenu()
+        for companion in CompanionType.allCases {
+            let item = NSMenuItem(title: "\(companion.emoji) \(companion.name)", action: #selector(selectCompanion(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = companion
+            item.state = (companion == currentCompanion) ? .on : .off
+            companionSubmenu.addItem(item)
+        }
+        
+        let companionMenuItem = NSMenuItem(title: "Select Companion", action: nil, keyEquivalent: "")
+        companionMenuItem.submenu = companionSubmenu
+        menu.addItem(companionMenuItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        let quitItem = NSMenuItem(title: "Quit \(currentCompanion.name)", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
         
         statusItem.menu = menu
+    }
+    
+    @objc private func selectCompanion(_ sender: NSMenuItem) {
+        if let companion = sender.representedObject as? CompanionType {
+            currentCompanion = companion
+            updateStatusMenu()
+        }
     }
     
     @objc private func quitApp() {
@@ -247,7 +274,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 facingDirection = .right
             }
             
-            let bobbingY = sin(timeStep * 2.8) * 7.0 // Slower gentle bobbing
+            let bobbingY = sin(timeStep * 2.8) * 7.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
             if timeStep >= nextFlipTime {
@@ -369,10 +396,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-/// SwiftUI Hosting Root View observing AppDelegate state
+/// SwiftUI Hosting Root View observing AppDelegate state and routing between companions
 struct GhostHostView: View {
     let delegate: AppDelegate
     
+    @State private var companion: CompanionType = .boo
     @State private var state: GhostState = .patrol
     @State private var facing: FacingDirection = .right
     @State private var position: CGPoint = .zero
@@ -388,19 +416,34 @@ struct GhostHostView: View {
             ZStack {
                 Color.clear
                 
-                GhostCanvasView(
-                    state: state,
-                    facingDirection: facing,
-                    animationTime: animTime,
-                    eyeOffsetX: eyeOffsetX,
-                    headTiltAngle: headTiltAngle,
-                    flipAngle: flipAngle,
-                    currentEmoji: currentEmoji,
-                    isNightMode: isNightMode
-                )
-                .position(x: position.x, y: geometry.size.height - position.y)
+                if companion == .salem {
+                    SalemCanvasView(
+                        state: state,
+                        facingDirection: facing,
+                        animationTime: animTime,
+                        eyeOffsetX: eyeOffsetX,
+                        headTiltAngle: headTiltAngle,
+                        flipAngle: flipAngle,
+                        currentEmoji: currentEmoji,
+                        isNightMode: isNightMode
+                    )
+                    .position(x: position.x, y: geometry.size.height - position.y)
+                } else {
+                    GhostCanvasView(
+                        state: state,
+                        facingDirection: facing,
+                        animationTime: animTime,
+                        eyeOffsetX: eyeOffsetX,
+                        headTiltAngle: headTiltAngle,
+                        flipAngle: flipAngle,
+                        currentEmoji: currentEmoji,
+                        isNightMode: isNightMode
+                    )
+                    .position(x: position.x, y: geometry.size.height - position.y)
+                }
             }
         }
+        .onReceive(delegate.$currentCompanion) { companion = $0 }
         .onReceive(delegate.$currentState) { state = $0 }
         .onReceive(delegate.$facingDirection) { facing = $0 }
         .onReceive(delegate.$ghostPosition) { position = $0 }
