@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import Combine
 
-/// Main App Delegate coordinating menu bar status item, overlay window, state machine, timers, and click-to-wake.
+/// Main App Delegate coordinating menu bar status item, overlay window, state machine, timers, and click-to-wake for Boo.
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var window: GhostWindow!
@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @Published private(set) var isNightMode: Bool = false
     
     private var timer: Timer?
-    private var glideSpeed: CGFloat = 1.4
+    private var glideSpeed: CGFloat = 0.8 // Calmer, gentler floating speed for Boo
     private var timeStep: Double = 0.0
     
     // Mouse Velocity Tracking for Startled State
@@ -70,16 +70,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if let button = statusItem.button {
             button.image = createGhostMenuIcon()
-            button.toolTip = "GhostPal - Dock Companion"
+            button.toolTip = "Boo 👻 - Dock Companion"
         }
         
         let menu = NSMenu()
-        let titleItem = NSMenuItem(title: "GhostPal (Dock Companion)", action: nil, keyEquivalent: "")
+        let titleItem = NSMenuItem(title: "Boo 👻 (Dock Companion)", action: nil, keyEquivalent: "")
         titleItem.isEnabled = false
         menu.addItem(titleItem)
         menu.addItem(NSMenuItem.separator())
         
-        let quitItem = NSMenuItem(title: "Quit Ghost", action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: "Quit Boo", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
         
@@ -194,7 +194,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let dy = mouseLocation.y - ghostPosition.y
         let mouseDistance = sqrt(dx * dx + dy * dy)
         
-        // Item 5: Mouse Velocity Tracking for Startled State Trigger
         let mDist = sqrt(pow(mouseLocation.x - lastMouseLocation.x, 2) + pow(mouseLocation.y - lastMouseLocation.y, 2))
         let dt = timeStep - lastMouseTime
         let mouseVelocity = dt > 0 ? (mDist / CGFloat(dt)) : 0.0
@@ -207,7 +206,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             startledEndTime = timeStep + 1.6
         }
         
-        // Item 3: Thought Bubble Emoji Check
         if timeStep >= nextEmojiTime && currentEmoji == nil && currentState != .sleeping && currentState != .startled {
             currentEmoji = emojiPool.randomElement()
             emojiEndTime = timeStep + 3.5
@@ -216,7 +214,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             currentEmoji = nil
         }
         
-        // Item 1: Cursor Staring Check
         if (currentState == .patrol || currentState == .staring) && mouseDistance <= 160.0 {
             currentState = .staring
             facingDirection = (dx >= 0) ? .right : .left
@@ -250,7 +247,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 facingDirection = .right
             }
             
-            let bobbingY = sin(timeStep * 3.5) * 8.0
+            let bobbingY = sin(timeStep * 2.8) * 7.0 // Slower gentle bobbing
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
             if timeStep >= nextFlipTime {
@@ -267,7 +264,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             
         case .startled:
-            // Item 5: Startled gasp float reaction
             eyeOffsetX = 0.0
             headTiltAngle = 0.0
             flipAngle = 0.0
@@ -295,7 +291,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
         case .lookingAround:
             flipAngle = 0.0
-            let bobbingY = sin(timeStep * 3.5) * 4.0
+            let bobbingY = sin(timeStep * 2.8) * 4.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
             let lookDuration: Double = 3.6
@@ -329,7 +325,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             headTiltAngle = 0.0
             flipAngle = 0.0
             
-            let bobbingY = sin(timeStep * 3.5) * 4.0
+            let bobbingY = sin(timeStep * 2.8) * 4.0
             ghostPosition.y = dockTopY + 16.0 + bobbingY
             
             if timeStep >= waveEndTime {
